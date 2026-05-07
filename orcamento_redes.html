@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Orçamentos — Redes & CFTV</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --surface3: #30363d;
+    --border: #30363d;
+    --border-light: #21262d;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --accent-dim: rgba(249,115,22,0.12);
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --green: #3fb950;
+    --blue: #58a6ff;
+    --red: #f85149;
+    --yellow: #d29922;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 60px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 16px; letter-spacing: -0.3px;
+  }
+  .header-logo-icon {
+    width: 34px; height: 34px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .header-subtitle { color: var(--text2); font-size: 12px; font-weight: 400; }
+
+  /* ---- TABS ---- */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex; gap: 0;
+  }
+  .tab-btn {
+    padding: 14px 22px; background: none; border: none;
+    color: var(--text2); cursor: pointer; font-family: inherit; font-size: 13px;
+    font-weight: 500; border-bottom: 2px solid transparent;
+    transition: all 0.15s; display: flex; align-items: center; gap: 7px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-badge {
+    background: var(--surface3); color: var(--text2);
+    border-radius: 20px; padding: 1px 7px; font-size: 11px; font-family: 'DM Mono', monospace;
+  }
+  .tab-btn.active .tab-badge { background: var(--accent-dim); color: var(--accent); }
+
+  /* ---- LAYOUT ---- */
+  .content { padding: 28px; max-width: 1300px; margin: 0 auto; }
+  .pane { display: none; }
+  .pane.active { display: block; }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 13px; font-weight: 600; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before { content:''; display:inline-block; width:3px; height:14px; background:var(--accent); border-radius:2px; }
+
+  /* ---- GRID ---- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+
+  /* ---- INPUTS ---- */
+  .field label {
+    display: block; font-size: 11px; font-weight: 600; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px;
+  }
+  .field input, .field select {
+    width: 100%; padding: 9px 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-family: inherit; font-size: 13px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--text3); }
+  .field select option { background: var(--surface2); }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius-sm); border: none;
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(249,115,22,0.35); }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text2); }
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+  .btn-danger:hover { background: rgba(248,81,73,0.1); }
+  .btn-green { background: transparent; color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .btn-green:hover { background: rgba(63,185,80,0.1); }
+  .btn-blue { background: transparent; color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+  .btn-blue:hover { background: rgba(88,166,255,0.1); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-xs { padding: 3px 9px; font-size: 11px; }
+
+  /* ---- SEARCH BAR ---- */
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 36px; }
+  .search-icon {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 14px; pointer-events: none;
+  }
+
+  /* ---- TABLE ---- */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: var(--surface2); padding: 10px 12px; text-align: left;
+    font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.6px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  thead th.r { text-align: right; }
+  thead th.c { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 10px 12px; vertical-align: middle; }
+  tbody td.r { text-align: right; }
+  tbody td.c { text-align: center; }
+  .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+  .code-badge {
+    background: var(--accent-dim); color: var(--accent);
+    border-radius: 4px; padding: 2px 7px; font-size: 11px; font-family: 'DM Mono', monospace;
+  }
+  .acq-badge {
+    display: inline-block; border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 600;
+  }
+  .acq-compra { background: rgba(88,166,255,0.1); color: var(--blue); }
+  .acq-estoque { background: rgba(63,185,80,0.1); color: var(--green); }
+
+  /* ---- QTY INPUT ---- */
+  .qty-input {
+    width: 68px; padding: 5px 8px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px;
+    text-align: center; outline: none;
+  }
+  .qty-input:focus { border-color: var(--accent); }
+
+  /* ---- TOTAL ROW ---- */
+  .total-row td {
+    background: var(--surface2) !important;
+    border-top: 2px solid var(--accent) !important;
+    font-weight: 700; color: var(--accent); font-size: 15px;
+  }
+  .total-row td:first-child { color: var(--text2); font-size: 13px; }
+
+  /* ---- SUPPLIER TOGGLE ---- */
+  .supplier-toggle { display: flex; gap: 8px; align-items: center; }
+  .sup-btn {
+    padding: 7px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text2); cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .sup-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .sup-btn:hover:not(.active) { border-color: var(--text2); color: var(--text); }
+
+  /* ---- HISTORY CARD ---- */
+  .hist-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+  .hist-card:hover { border-color: var(--accent); }
+  .hist-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+  .hist-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .version-pill {
+    background: var(--accent-dim); color: var(--accent);
+    border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace;
+  }
+  .hist-total { font-size: 22px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .hist-actions { display: flex; gap: 8px; }
+
+  /* ---- BANNER ---- */
+  .edit-banner {
+    background: rgba(217,161,34,0.1); border: 1px solid rgba(217,161,34,0.35);
+    border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+  }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    text-align: center; padding: 64px 20px; color: var(--text3);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ---- SCROLLABLE TABLE ---- */
+  .mat-table-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .mat-table-wrap::-webkit-scrollbar { width: 6px; }
+  .mat-table-wrap::-webkit-scrollbar-track { background: var(--surface2); }
+  .mat-table-wrap::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  /* ---- FILTERS ROW ---- */
+  .filter-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+
+  /* ---- PRINT STYLES ---- */
+  @media print {
+    body { background: white; color: #111; }
+    .no-print { display: none !important; }
+  }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+  .pane.active { animation: fadeIn 0.2s ease; }
+
+  /* ---- TOOLTIP / DIVIDER ---- */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .flex-between { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .flex-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  .stat-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text2);
+  }
+  .stat-chip .val { font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <div class="header-logo-icon">📡</div>
+    <div>
+      <div>OrcaNet</div>
+      <div class="header-subtitle">Sistema de Orçamentos — Redes &amp; CFTV</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('orcamento',this)">
+    ＋ Orçamento
+  </button>
+  <button class="tab-btn" onclick="switchTab('historico',this)">
+    📋 Histórico <span class="tab-badge" id="hist-count">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('cadastro',this)">
+    🔧 Cadastro <span class="tab-badge" id="mat-count">0</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════ ABA ORÇAMENTO ═══════════════════════════════════════ -->
+<div class="content">
+<div id="pane-orcamento" class="pane active">
+
+  <div id="edit-banner" class="edit-banner" style="display:none">
+    <span>⚠️</span>
+    <span id="edit-banner-text"></span>
+    <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="cancelEdit()">Cancelar edição</button>
+  </div>
+
+  <!-- Dados do orçamento -->
+  <div class="card">
+    <div class="card-title">Identificação do Orçamento</div>
+    <div class="grid4" style="margin-bottom:14px">
+      <div class="field">
+        <label>Solicitante *</label>
+        <input id="f-solicitante" type="text" placeholder="Nome do solicitante">
+      </div>
+      <div class="field">
+        <label>Local / Projeto *</label>
+        <input id="f-local" type="text" placeholder="Ex: CFTV RCM — Bloco B">
+      </div>
+      <div class="field">
+        <label>Responsável pelo Orçamento *</label>
+        <input id="f-responsavel" type="text" placeholder="Nome do orçamentista">
+      </div>
+      <div class="field">
+        <label>E-mail do Destinatário</label>
+        <input id="f-email" type="email" placeholder="destino@empresa.com">
+      </div>
+    </div>
+    <div class="flex-between">
+      <div class="flex-row">
+        <span style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Forma de Aquisição:</span>
+        <div class="supplier-toggle">
+          <button class="sup-btn active" id="sup-todas" onclick="setSup('TODAS',this)">🔄 Todas</button>
+          <button class="sup-btn" id="sup-estoque" onclick="setSup('ESTOQUE',this)">📦 Estoque</button>
+          <button class="sup-btn" id="sup-compra" onclick="setSup('COMPRA',this)">🛒 Compra</button>
+        </div>
+      </div>
+      <div class="flex-row">
+        <div class="stat-chip">Itens: <span class="val" id="stat-items">0</span></div>
+        <div class="stat-chip">Total: <span class="val" id="stat-total">R$ 0,00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Catálogo de materiais -->
+  <div class="card">
+    <div class="flex-between" style="margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0">Catálogo de Materiais</div>
+      <div class="search-wrap" style="width:320px">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="cat-search" placeholder="Buscar por descrição ou código..." oninput="renderCatalog()">
+      </div>
+    </div>
+    <div class="mat-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código SAP</th>
+            <th>Descrição</th>
+            <th class="c">Unidade</th>
+            <th class="r">Custo Unit.</th>
+            <th class="c">Aquisição</th>
+            <th class="c">Ação</th>
+          </tr>
+        </thead>
+        <tbody id="catalog-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Itens selecionados -->
+  <div class="card" id="items-card" style="display:none">
+    <div class="card-title">Itens do Orçamento</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th class="c">Un.</th>
+            <th class="c">Qtd</th>
+            <th class="r">Custo Unit.</th>
+            <th class="r">Total</th>
+            <th class="c">Aquisição</th>
+            <th class="c"></th>
+          </tr>
+        </thead>
+        <tbody id="items-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Ações -->
+  <div class="flex-row" style="justify-content:flex-end;gap:10px">
+    <button class="btn btn-ghost" onclick="clearForm()">🔄 Limpar</button>
+    <button class="btn btn-primary" onclick="saveBudget()">💾 Salvar Orçamento</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ ABA HISTÓRICO ═══════════════════════════════════════ -->
+<div id="pane-historico" class="pane">
+
+  <div class="card">
+    <div class="card-title" style="margin-bottom:14px">Filtros</div>
+    <div class="filter-row">
+      <div class="field">
+        <label>Solicitante</label>
+        <input type="text" id="hf-solicitante" oninput="renderHistory()" placeholder="Filtrar...">
+      </div>
+      <div class="field">
+        <label>Local / Projeto</label>
+        <input type="text" id="hf-local" oninput="renderHistory()" placeholder="Filtrar...">
+      </div>
+      <div class="field">
+        <label>Responsável</label>
+        <input type="text" id="hf-responsavel" oninput="renderHistory()" placeholder="Filtrar...">
+      </div>
+      <div class="field">
+        <label>Data Início</label>
+        <input type="date" id="hf-inicio" oninput="renderHistory()">
+      </div>
+      <div class="field">
+        <label>Data Fim</label>
+        <input type="date" id="hf-fim" oninput="renderHistory()">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="clearHistFilters()">Limpar filtros</button>
+    </div>
+  </div>
+
+  <div id="history-list"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ ABA CADASTRO ═══════════════════════════════════════ -->
+<div id="pane-cadastro" class="pane">
+
+  <div class="card">
+    <div class="card-title" id="cad-title">Novo Insumo</div>
+    <div style="display:grid;grid-template-columns:160px 1fr 100px 140px 140px 160px auto;gap:12px;align-items:end">
+      <div class="field">
+        <label>Código SAP</label>
+        <input id="cad-codigo" type="text" placeholder="Ex: 7022389">
+      </div>
+      <div class="field">
+        <label>Descrição *</label>
+        <input id="cad-descricao" type="text" placeholder="Descrição do material">
+      </div>
+      <div class="field">
+        <label>Unidade</label>
+        <input id="cad-unidade" type="text" placeholder="PC / MT / UN">
+      </div>
+      <div class="field">
+        <label>Custo Unitário (R$)</label>
+        <input id="cad-custo" type="number" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label>Forma de Aquisição</label>
+        <select id="cad-aquisicao">
+          <option value="COMPRA">COMPRA</option>
+          <option value="ESTOQUE">ESTOQUE</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Obs / Fabricante</label>
+        <input id="cad-obs" type="text" placeholder="Opcional">
+      </div>
+      <div style="display:flex;gap:6px;padding-bottom:1px">
+        <button class="btn btn-primary" onclick="saveMaterial()">💾 Salvar</button>
+        <button class="btn btn-ghost" id="cad-cancel" onclick="cancelMatEdit()" style="display:none">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="flex-between" style="margin-bottom:14px">
+      <div class="card-title" style="margin-bottom:0">Base de Insumos (<span id="cad-count-label">0</span>)</div>
+      <div class="search-wrap" style="width:260px">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="cad-search" placeholder="Buscar insumo..." oninput="renderCadTable()">
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código SAP</th>
+            <th>Descrição</th>
+            <th class="c">Un.</th>
+            <th class="r">Custo Unit.</th>
+            <th class="c">Aquisição</th>
+            <th>Obs</th>
+            <th class="c">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="cad-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══════════════════════════════════════ PRINT MODAL (hidden) ═══════════════════════════════ -->
+<div id="print-frame" style="display:none"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  DATA LAYER
+// ═══════════════════════════════════════════════════════════════
+
+const DEFAULT_MATERIALS = [
+  { id:1,   codigo:'7031905',    descricao:'ABRACADEIRA GALV.D P/ELETROD.I 1 C/PARAF',                              unidade:'PC',    custo:3.48,    aquisicao:'COMPRA',  obs:'' },
+  { id:2,   codigo:'7031778',    descricao:'ABRACADEIRA GALV.D P/ELETROD.I 2 C/PARAF',                              unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:3,   codigo:'19251189',   descricao:'ACOPLADOR ÓPTICO LC (UPC) x LC (UPC) MONO MODO SIMPLEX AZUL',           unidade:'PC',    custo:7,       aquisicao:'COMPRA',  obs:'' },
+  { id:4,   codigo:'19236950',   descricao:'ALCA PREF.CABO MULTIPLEXADO 25MM2 228833',                              unidade:'PC',    custo:8.18,    aquisicao:'ESTOQUE', obs:'' },
+  { id:5,   codigo:'19121931',   descricao:'Alça Pref. Distrib. CB CA-CAA 34mm2',                                   unidade:'PC',    custo:6,       aquisicao:'COMPRA',  obs:'' },
+  { id:6,   codigo:'CADASTRAR',  descricao:'ARRUELA ALUMINIO P/ELETRODUTO I 1',                                     unidade:'PC',    custo:1.38,    aquisicao:'COMPRA',  obs:'' },
+  { id:7,   codigo:'7030933',    descricao:'ARRUELA ALUMINIO P/ELETRODUTO I 1',                                     unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:8,   codigo:'7039072',    descricao:'BARRA ROSC M6X1000MM SAE-1020 OLE',                                     unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:9,   codigo:'7189930',    descricao:'BARRA ROSC M8X1000MM SAE-1020 OLE',                                     unidade:'UN.',   custo:4.33,    aquisicao:'COMPRA',  obs:'' },
+  { id:10,  codigo:'7371324',    descricao:'KIT BANDEJA DE EMENDA FURUKAWA 35260412',                               unidade:'UN.',   custo:200,     aquisicao:'COMPRA',  obs:'' },
+  { id:11,  codigo:'7071395',    descricao:'BRAÇADEIRA REGUL 2,5 X 100 MM NYLON',                                   unidade:'CEM',   custo:0.1,     aquisicao:'ESTOQUE', obs:'' },
+  { id:12,  codigo:'7031373',    descricao:'BRAÇADEIRA REGUL 2,5 X 203 MM NYLON',                                   unidade:'UN.',   custo:0.18,    aquisicao:'ESTOQUE', obs:'' },
+  { id:13,  codigo:'7166699',    descricao:'BRAÇADEIRA REGUL 4,8 X 300 MM NYLON',                                   unidade:'UN.',   custo:0.35,    aquisicao:'ESTOQUE', obs:'' },
+  { id:14,  codigo:'7071401',    descricao:'BRAÇADEIRA REGUL 4,9 X 195 MM NYLON',                                   unidade:'CEM',   custo:0.36,    aquisicao:'ESTOQUE', obs:'' },
+  { id:15,  codigo:'7031368',    descricao:'BRAÇADEIRA REGUL 4,9 X 381 MM NYLON',                                   unidade:'UN.',   custo:0.76,    aquisicao:'COMPRA',  obs:'' },
+  { id:16,  codigo:'CADASTRAR',  descricao:'BUCHA NYLON S8 FLOG P/GESSO E DRYWALL',                                 unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:17,  codigo:'7125456',    descricao:'BUCHA EXPANSÃO FISCHER S10',                                            unidade:'UN.',   custo:0.05,    aquisicao:'COMPRA',  obs:'' },
+  { id:18,  codigo:'7041564',    descricao:'BUCHA NYLON FIXACAO S-08 S/PARAF. 601542 FIS',                          unidade:'UN.',   custo:0.05,    aquisicao:'COMPRA',  obs:'' },
+  { id:19,  codigo:'7116066',    descricao:'CABO FURUKAWA CAT6 PARES UTP P/REDE',                                   unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:20,  codigo:'19249151',   descricao:'CABO UTP CAT.6 4 PARES SOHOPLUS 2183201380428 (NÃO USAR)',              unidade:'METRO', custo:40,      aquisicao:'COMPRA',  obs:'' },
+  { id:21,  codigo:'19238888',   descricao:'CABO DE ALIMENTAÇÃO PARA CONEXÃO ENTRE O DISPLAY HOPLO E O SENSOR RADA',unidade:'UN.',   custo:400,     aquisicao:'COMPRA',  obs:'' },
+  { id:22,  codigo:'19243427',   descricao:'CABO LAN 04 PARES 24 AWG CAT.6A PRETO BLINDADO',                       unidade:'METRO', custo:58.88,   aquisicao:'COMPRA',  obs:'' },
+  { id:23,  codigo:'19249171',   descricao:'CABO LAN 04 PARES 23 AWG POLIET CAT.6A 1',                             unidade:'METRO', custo:4800,    aquisicao:'COMPRA',  obs:'' },
+  { id:24,  codigo:'19234934',   descricao:'CABO DE FIBRA OPTICA AUTOSSUSTENVAVEL - 12 FO',                        unidade:'MT',    custo:6.33,    aquisicao:'COMPRA',  obs:'' },
+  { id:25,  codigo:'7113297',    descricao:'CABO ELÉTRICO 3x2,5MM',                                                 unidade:'MT',    custo:9.41,    aquisicao:'COMPRA',  obs:'' },
+  { id:26,  codigo:'7005547',    descricao:'CABO PP 500V 3X02,50MM2 CL5 FLEX',                                      unidade:'MT',    custo:3.95,    aquisicao:'COMPRA',  obs:'' },
+  { id:27,  codigo:'7309454',    descricao:'CABO ELE 03X35+01X35 MM2 0,6/1KV (PE)',                                 unidade:'MT',    custo:30,      aquisicao:'COMPRA',  obs:'' },
+  { id:28,  codigo:'7006928',    descricao:'CANTONEIRA L 25,40X25,40X6,35MM ASTM-A 36',                             unidade:'KG',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:29,  codigo:'18031045',   descricao:'CAIXA DE EMENDA PARA FIBRA ÓTICA EXTERNA BARGOA TSU 24 FO',             unidade:'PC',    custo:243.5,   aquisicao:'ESTOQUE', obs:'' },
+  { id:30,  codigo:'7022385',    descricao:'CONDULETE AL.S/ROSCA C/TAMPA C I 1',                                    unidade:'UN.',   custo:19.02,   aquisicao:'ESTOQUE', obs:'' },
+  { id:31,  codigo:'19235423',   descricao:'CONDULETE AL.S/ROSCA C/TAMPA E I 1',                                    unidade:'UN.',   custo:32,      aquisicao:'COMPRA',  obs:'' },
+  { id:32,  codigo:'19235424',   descricao:'CONDULETE AL.S/ROSCA C/TAMPA LB I 1',                                   unidade:'UN.',   custo:40,      aquisicao:'COMPRA',  obs:'' },
+  { id:33,  codigo:'7022386',    descricao:'CONDULETE AL.S/ROSCA C/TAMPA LL I 1',                                   unidade:'UN.',   custo:16.44,   aquisicao:'ESTOQUE', obs:'' },
+  { id:34,  codigo:'7022389',    descricao:'CONDULETE AL.S/ROSCA C/TAMPA LR I 1',                                   unidade:'UN.',   custo:33.08,   aquisicao:'ESTOQUE', obs:'' },
+  { id:35,  codigo:'19098853',   descricao:'CONDULETE AL.S/ROSCA C/TAMPA T I 1',                                    unidade:'UN.',   custo:30,      aquisicao:'COMPRA',  obs:'' },
+  { id:36,  codigo:'7032594',    descricao:"CONDULETE AL.S/ROSCA C/TAMPA LR 2''",                                   unidade:'UN.',   custo:85.9,    aquisicao:'COMPRA',  obs:'' },
+  { id:37,  codigo:'CADASTRAR',  descricao:"CONDULETE AL.S/ROSCA C/TAMPA LL 2''",                                   unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:38,  codigo:'7393990',    descricao:'CONDULETE AL.S/ROSCA C/TAMPA E 2"',                                     unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:39,  codigo:'7065175',    descricao:'CONECTOR MACHO-GIRATORIO KMZG-100/TMG I 1',                             unidade:'UN.',   custo:22.77,   aquisicao:'ESTOQUE', obs:'' },
+  { id:40,  codigo:'19154711',   descricao:'CONECTOR PERF.P-25 (S1-16/70mm2 S2-6/35mm2)',                           unidade:'UN.',   custo:300,     aquisicao:'COMPRA',  obs:'' },
+  { id:41,  codigo:'19234847',   descricao:'CONVERSOR MIDIA SM 10-1000 SCRJ 10KM GT-802S',                          unidade:'PC',    custo:1409.33, aquisicao:'ESTOQUE', obs:'' },
+  { id:42,  codigo:'7320922',    descricao:'CONVERSOR MIDIA MM -KFM 112',                                           unidade:'UN.',   custo:188,     aquisicao:'COMPRA',  obs:'' },
+  { id:43,  codigo:'CADASTRAR',  descricao:'CORDAO SM 2F SCSC APC 657A LSZH 10M 33000921',                         unidade:'PC',    custo:166.96,  aquisicao:'COMPRA',  obs:'' },
+  { id:44,  codigo:'CADASTRAR',  descricao:'CORDAO SM 2F LCSC UPC 2,5M 657A LSZH 33004513',                        unidade:'PC',    custo:453.89,  aquisicao:'COMPRA',  obs:'' },
+  { id:45,  codigo:'19234925',   descricao:'CORDÃO SM 2F SCSC UPC 1,5m',                                           unidade:'PC',    custo:200,     aquisicao:'ESTOQUE', obs:'' },
+  { id:46,  codigo:'19262841',   descricao:'CORDÃO SM 2F LCLC UPC',                                                 unidade:'METRO', custo:65,      aquisicao:'COMPRA',  obs:'' },
+  { id:47,  codigo:'19251157',   descricao:'CORDÃO SM 2F LCSC 1,5m',                                               unidade:'METRO', custo:100,     aquisicao:'COMPRA',  obs:'' },
+  { id:48,  codigo:'CADASTRAR',  descricao:'CORDÃO SM 2F SCSC 2,5m',                                               unidade:'PC',    custo:344.9,   aquisicao:'COMPRA',  obs:'' },
+  { id:49,  codigo:'19256925',   descricao:'CORDÃO MM 2F SCSC 1,5m',                                               unidade:'METRO', custo:420,     aquisicao:'COMPRA',  obs:'' },
+  { id:50,  codigo:'CADASTRAR',  descricao:"CURVA 90° 1' ALUMÍNIO GALVANIZADO",                                     unidade:'PC',    custo:29,      aquisicao:'COMPRA',  obs:'' },
+  { id:51,  codigo:'19236845',   descricao:'DIO A270 12FO 2FLEX C/ EXTENSÃO OPTICA E ACOPLADOR ÓPTICO SC',          unidade:'UN.',   custo:500,     aquisicao:'COMPRA',  obs:'' },
+  { id:52,  codigo:'CADASTRAR',  descricao:'DIO A270 BAND/METAL FO 48P',                                            unidade:'PC',    custo:1420.23, aquisicao:'COMPRA',  obs:'' },
+  { id:53,  codigo:'19236949',   descricao:'DIO BW12 PAREDE C/BA/PL.PVC CZ 12/24 35260276',                        unidade:'UN.',   custo:500,     aquisicao:'COMPRA',  obs:'' },
+  { id:54,  codigo:'19151846',   descricao:'DISJUNTOR 10A',                                                         unidade:'UN.',   custo:12,      aquisicao:'COMPRA',  obs:'' },
+  { id:55,  codigo:'7013844',    descricao:'DISJUNTOR 16A',                                                         unidade:'UN.',   custo:31.5,    aquisicao:'COMPRA',  obs:'' },
+  { id:56,  codigo:'7016414',    descricao:'DISJUNTOR 25A 2P',                                                      unidade:'UN.',   custo:25.32,   aquisicao:'COMPRA',  obs:'' },
+  { id:57,  codigo:'7027139',    descricao:"ELETRODUTO GALV. 2''",                                                  unidade:'UN.',   custo:220.88,  aquisicao:'COMPRA',  obs:'' },
+  { id:58,  codigo:'7027150',    descricao:'ELETRODUTO GALV.FG.EB342/NBR5598 I 1 2,65MM',                          unidade:'UN.',   custo:97.72,   aquisicao:'ESTOQUE', obs:'' },
+  { id:59,  codigo:'CADASTRAR',  descricao:'ESTICADOR PARA FIBRA DROP',                                             unidade:'PC',    custo:6.21,    aquisicao:'COMPRA',  obs:'' },
+  { id:60,  codigo:'18108284',   descricao:'EXTENSAO SM 2F SC UPC 1,5MT',                                          unidade:'UN.',   custo:60,      aquisicao:'COMPRA',  obs:'' },
+  { id:61,  codigo:'19235982',   descricao:'FECHO P/ FITA ACO INOX 3/4 DENTADO',                                   unidade:'UN.',   custo:2.45,    aquisicao:'ESTOQUE', obs:'' },
+  { id:62,  codigo:'7008666',    descricao:'FILTRO LINHA PVC 05T.2P+T PR 1,2MT QFL5 QUALIT',                       unidade:'UN.',   custo:22,      aquisicao:'COMPRA',  obs:'' },
+  { id:63,  codigo:'19236951',   descricao:'FITA ACO PERFURADA 19MMX10M',                                          unidade:'RL',    custo:93.81,   aquisicao:'ESTOQUE', obs:'' },
+  { id:64,  codigo:'7008566',    descricao:'FITA ADESIVA DUPLA-FACE 24MMX02M FIXA F.EXT.3M',                       unidade:'UN.',   custo:158.2,   aquisicao:'COMPRA',  obs:'' },
+  { id:65,  codigo:'19236951',   descricao:'FITA DE AÇO FUSIMEC 3/4',                                              unidade:'UN.',   custo:93.81,   aquisicao:'ESTOQUE', obs:'' },
+  { id:66,  codigo:'19059908',   descricao:'GRAMPO "U" 1" C/PORCA',                                                 unidade:'UN.',   custo:6.54,    aquisicao:'COMPRA',  obs:'' },
+  { id:67,  codigo:'19243426',   descricao:'GUIA CABOS HORI.19" 1U 50MM METALIC.PR CONTATO',                       unidade:'UN.',   custo:40.85,   aquisicao:'COMPRA',  obs:'' },
+  { id:68,  codigo:'C85462000',  descricao:'ISOLADOR ROLDANA',                                                      unidade:'UN.',   custo:40,      aquisicao:'COMPRA',  obs:'' },
+  { id:69,  codigo:'7371324',    descricao:'KIT BANDEJA EMENDA P/DIO 12 FIBRAS',                                    unidade:'UN.',   custo:200,     aquisicao:'COMPRA',  obs:'' },
+  { id:70,  codigo:'19243369',   descricao:'KIT PORCA GAIOLA+PARAFUSO PHILIPS M5 C/10PÇS',                         unidade:'CJ',    custo:420,     aquisicao:'COMPRA',  obs:'' },
+  { id:71,  codigo:'18108285',   descricao:'KIT SUPORT.ADAPT.C/3PCS P/DIO A270 LC/SC',                             unidade:'UN.',   custo:200,     aquisicao:'COMPRA',  obs:'' },
+  { id:72,  codigo:'CADASTRAR',  descricao:'PAINEL P/M.400x300x250MM',                                              unidade:'PC',    custo:600,     aquisicao:'COMPRA',  obs:'' },
+  { id:73,  codigo:'1094007',    descricao:'PAINEL P/M.500X400X200MM',                                              unidade:'UN.',   custo:342.26,  aquisicao:'COMPRA',  obs:'' },
+  { id:74,  codigo:'7335144',    descricao:'PAINEL P/M.600x500x250MM',                                              unidade:'UN.',   custo:1692.27, aquisicao:'COMPRA',  obs:'' },
+  { id:75,  codigo:'CADASTRAR',  descricao:'PAINEL P/M.0600X400X200MM',                                             unidade:'PC',    custo:814.05,  aquisicao:'COMPRA',  obs:'' },
+  { id:76,  codigo:'19236948',   descricao:'PARAFUSO A.ATAR.C.PANELA PHILIPS 4,8X38MM',                             unidade:'UN.',   custo:0.6,     aquisicao:'COMPRA',  obs:'' },
+  { id:77,  codigo:'19131132',   descricao:'PARAFUSO BROCANTE SEXTAVADO 8mm',                                       unidade:'UN.',   custo:3.65,    aquisicao:'COMPRA',  obs:'' },
+  { id:78,  codigo:'50000270',   descricao:'PARAFUSO AUTO BROCANTE 4.2 x 13 PHILIPS',                               unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:79,  codigo:'CADASTRAR',  descricao:'PARAFUSO GALV.MAQ.FRANCE.12X045MM R.TOT.P/ABRA',                       unidade:'PC',    custo:3.17,    aquisicao:'COMPRA',  obs:'' },
+  { id:80,  codigo:'7387350',    descricao:'PARAFUSO CABEÇA QUADRADA COMPRIMENTO 400 MM',                           unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:81,  codigo:'CADASTRAR',  descricao:'PATCH CORD CAT6 0,5M',                                                  unidade:'PC',    custo:95.23,   aquisicao:'COMPRA',  obs:'' },
+  { id:82,  codigo:'19251376',   descricao:'PATCH CORD U/UTP SOHOPLUS CAT.6 CMX T568A/B 1.5M AZUL',                unidade:'METRO', custo:40,      aquisicao:'COMPRA',  obs:'' },
+  { id:83,  codigo:'7006710',    descricao:'PORCA SEXT M 6X1,00 CR-5 DIN-934 CAD',                                  unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:84,  codigo:'CADASTRAR',  descricao:'PATCH CORD CAT6 2,5M',                                                  unidade:'PC',    custo:116.87,  aquisicao:'COMPRA',  obs:'' },
+  { id:85,  codigo:'PROHETEL',   descricao:'POSTE DE MADEIRA 300 DAM',                                              unidade:'PC',    custo:13,      aquisicao:'ESTOQUE', obs:'' },
+  { id:86,  codigo:'19243370',   descricao:'PATCH PANEL 24P FURUKAWA MULTILAN CAT.6',                               unidade:'UN.',   custo:597,     aquisicao:'COMPRA',  obs:'' },
+  { id:87,  codigo:'7037541',    descricao:'PLUG RJ45 CAT6 FTP BLIND.P/CABO DIVERSOS C/10',                        unidade:'PCT',   custo:35.83,   aquisicao:'COMPRA',  obs:'' },
+  { id:88,  codigo:'19235982',   descricao:'PRESILHA FUSIMEC',                                                      unidade:'UN.',   custo:2.45,    aquisicao:'ESTOQUE', obs:'' },
+  { id:89,  codigo:'CADASTRAR',  descricao:'PROTETOR FIBRACEM OI.01078 P/REDE FIBRA',                               unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:90,  codigo:'7017248',    descricao:'PORCA SEXT M 8X1,25 CR-6 DIN-934 OLE',                                  unidade:'UN.',   custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:91,  codigo:'19255616',   descricao:'RACK 06U 19"',                                                          unidade:'UN.',   custo:600,     aquisicao:'COMPRA',  obs:'' },
+  { id:92,  codigo:'19235420',   descricao:'RACK 12U 19"',                                                          unidade:'UN.',   custo:800,     aquisicao:'COMPRA',  obs:'' },
+  { id:93,  codigo:'19040619',   descricao:'REGUA DE TOMADA ELÉT PAD RACK 19"',                                     unidade:'UN.',   custo:257.32,  aquisicao:'COMPRA',  obs:'' },
+  { id:94,  codigo:'7028117',    descricao:'SEAL-TUBE GALVANIZADO PVC I 1',                                         unidade:'METRO', custo:8.73,    aquisicao:'ESTOQUE', obs:'' },
+  { id:95,  codigo:'CADASTRAR',  descricao:'SUPORTE DM',                                                            unidade:'PC',    custo:18.23,   aquisicao:'COMPRA',  obs:'' },
+  { id:96,  codigo:'19235913',   descricao:'SUPORTE UNIVERSAL PARA CABO OPTICO',                                    unidade:'UN.',   custo:200,     aquisicao:'COMPRA',  obs:'' },
+  { id:97,  codigo:'CADASTRAR',  descricao:'SUPORTE P/BAP GALV.FG FURO 14 P/POSTE CIRCULAR',                       unidade:'PC',    custo:10,      aquisicao:'COMPRA',  obs:'' },
+  { id:98,  codigo:'19243425',   descricao:'TAMPA CEGA PARA RACK 19"',                                              unidade:'PC',    custo:18.59,   aquisicao:'COMPRA',  obs:'' },
+  { id:99,  codigo:'19107232',   descricao:'TAMPA P/COND.1" P/1TOM.RJ45 56117/017 TRA',                             unidade:'PC',    custo:8.63,    aquisicao:'COMPRA',  obs:'' },
+  { id:100, codigo:'CADASTRAR',  descricao:'TAMPA P/COND.1" P/2TOM.RJ45',                                          unidade:'PC',    custo:23.2,    aquisicao:'COMPRA',  obs:'' },
+  { id:101, codigo:'19243720',   descricao:'TOMADA RJ45 CAT6 568AB BR UTP SOHO 35050424',                           unidade:'UN.',   custo:80,      aquisicao:'COMPRA',  obs:'' },
+  { id:102, codigo:'1094007',    descricao:'TOMADA SISTEMA X 2P+T 10A 250V NBR14136 675060',                        unidade:'UN.',   custo:13.96,   aquisicao:'COMPRA',  obs:'' },
+  { id:103, codigo:'19155805',   descricao:'TOMADAS DE TRILHO 20A',                                                 unidade:'UN.',   custo:50,      aquisicao:'COMPRA',  obs:'' },
+  { id:104, codigo:'19093635',   descricao:'TRILHO DIN GALV.PERF 0,5MT S35MM',                                     unidade:'UN.',   custo:200,     aquisicao:'COMPRA',  obs:'' },
+  { id:105, codigo:'7116955',    descricao:'PACOTE TUBETES DE EMENDA PARA FIBRA OPTICA COM 100 UM',                 unidade:'UN.',   custo:63.94,   aquisicao:'ESTOQUE', obs:'' },
+  { id:106, codigo:'CADASTRAR',  descricao:'ORGANIZADOR DE CABOS SPIRAL 5/8',                                       unidade:'MT',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:107, codigo:'19251379',   descricao:'VELCRO DUPLA FACE 19 MM 3,6 M ROLO',                                   unidade:'UN.',   custo:30,      aquisicao:'COMPRA',  obs:'' },
+  { id:108, codigo:'CADASTRAR',  descricao:'CANALETA DE PISO CINZA',                                                unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:109, codigo:'CADASTRAR',  descricao:'TAMPA P/COND.3/4" P/1 TOM.RJ45 PVC CINZA CLARO',                       unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:110, codigo:'CADASTRAR',  descricao:'CONDULETE PVC.3/4" CINZA CLARO',                                        unidade:'PC',    custo:0,       aquisicao:'COMPRA',  obs:'' },
+  { id:111, codigo:'19236951',   descricao:'FITA ACO PERFURADA 3/4 FUSIMEC',                                        unidade:'RL',    custo:93.81,   aquisicao:'ESTOQUE', obs:'' },
+];
+
+function loadMaterials() {
+  try { return JSON.parse(localStorage.getItem('redes_mats2') || 'null') || DEFAULT_MATERIALS; } catch { return DEFAULT_MATERIALS; }
+}
+function saveMaterials(m) { localStorage.setItem('redes_mats2', JSON.stringify(m)); }
+function loadBudgets() {
+  try { return JSON.parse(localStorage.getItem('redes_budgets2') || '[]'); } catch { return []; }
+}
+function saveBudgets(b) { localStorage.setItem('redes_budgets2', JSON.stringify(b)); }
+
+let materials = loadMaterials();
+let budgets   = loadBudgets();
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let budgetItems   = [];  // [{id, materialId, qty}]
+let editingBudget = null;
+let editingMatId  = null;
+let supFilter     = 'TODAS';
+let nextId        = Date.now();
+const uid = () => ++nextId;
+
+// ═══════════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════════
+const fmt = v => 'R$ ' + Number(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function getMat(id) { return materials.find(m => m.id === id); }
+
+function calcTotal(items) {
+  return items.reduce((s,it) => {
+    const m = getMat(it.materialId);
+    return s + (m ? m.custo * it.qty : 0);
+  }, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pane-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'historico') renderHistory();
+  if (name === 'cadastro') renderCadTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CATALOG
+// ═══════════════════════════════════════════════════════════════
+function renderCatalog() {
+  const q = document.getElementById('cat-search').value.toLowerCase();
+  const tbody = document.getElementById('catalog-tbody');
+  const filtered = materials.filter(m => {
+    if (supFilter !== 'TODAS' && m.aquisicao !== supFilter) return false;
+    if (q && !m.descricao.toLowerCase().includes(q) && !m.codigo.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  tbody.innerHTML = filtered.length === 0
+    ? `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Nenhum material encontrado</td></tr>`
+    : filtered.map(m => `
+      <tr>
+        <td><span class="code-badge">${m.codigo}</span></td>
+        <td>${m.descricao}</td>
+        <td class="c" style="color:var(--text2)">${m.unidade}</td>
+        <td class="r mono">${fmt(m.custo)}</td>
+        <td class="c"><span class="acq-badge ${m.aquisicao==='COMPRA'?'acq-compra':'acq-estoque'}">${m.aquisicao}</span></td>
+        <td class="c">
+          <button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(249,115,22,.3)"
+            onclick="addItem(${m.id})">+ Adicionar</button>
+        </td>
+      </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BUDGET ITEMS
+// ═══════════════════════════════════════════════════════════════
+function addItem(matId) {
+  const existing = budgetItems.find(it => it.materialId === matId);
+  if (existing) { existing.qty++; }
+  else { budgetItems.push({ id: uid(), materialId: matId, qty: 1 }); }
+  renderItems();
+  updateStats();
+}
+
+function removeItem(id) {
+  budgetItems = budgetItems.filter(it => it.id !== id);
+  renderItems();
+  updateStats();
+}
+
+function changeQty(id, val) {
+  const it = budgetItems.find(it => it.id === id);
+  if (it) { it.qty = Math.max(1, parseInt(val)||1); }
+  updateStats();
+  // update total cell
+  const m = getMat(it ? it.materialId : 0);
+  if (m) {
+    const cell = document.getElementById('item-total-'+id);
+    if (cell) cell.textContent = fmt(m.custo * it.qty);
+    updateTotalRow();
+  }
+}
+
+function renderItems() {
+  const card = document.getElementById('items-card');
+  const tbody = document.getElementById('items-tbody');
+  if (budgetItems.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const rows = budgetItems.map(it => {
+    const m = getMat(it.materialId);
+    if (!m) return '';
+    return `
+      <tr>
+        <td><span class="code-badge">${m.codigo}</span></td>
+        <td>${m.descricao}</td>
+        <td class="c" style="color:var(--text2)">${m.unidade}</td>
+        <td class="c">
+          <input class="qty-input" type="number" min="1" value="${it.qty}"
+            onchange="changeQty(${it.id},this.value)" oninput="changeQty(${it.id},this.value)">
+        </td>
+        <td class="r mono">${fmt(m.custo)}</td>
+        <td class="r mono" id="item-total-${it.id}">${fmt(m.custo*it.qty)}</td>
+        <td class="c"><span class="acq-badge ${m.aquisicao==='COMPRA'?'acq-compra':'acq-estoque'}">${m.aquisicao}</span></td>
+        <td class="c">
+          <button class="btn btn-danger btn-xs" onclick="removeItem(${it.id})">✕</button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  tbody.innerHTML = rows + `
+    <tr class="total-row">
+      <td colspan="5">TOTAL GERAL</td>
+      <td class="r mono" id="grand-total">${fmt(calcTotal(budgetItems))}</td>
+      <td colspan="2"></td>
+    </tr>`;
+}
+
+function updateTotalRow() {
+  const el = document.getElementById('grand-total');
+  if (el) el.textContent = fmt(calcTotal(budgetItems));
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('stat-items').textContent = budgetItems.length;
+  document.getElementById('stat-total').textContent = fmt(calcTotal(budgetItems));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SUPPLIER FILTER
+// ═══════════════════════════════════════════════════════════════
+function setSup(val, btn) {
+  supFilter = val;
+  document.querySelectorAll('.sup-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCatalog();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SAVE BUDGET
+// ═══════════════════════════════════════════════════════════════
+function saveBudget() {
+  const sol  = document.getElementById('f-solicitante').value.trim();
+  const loc  = document.getElementById('f-local').value.trim();
+  const resp = document.getElementById('f-responsavel').value.trim();
+  const email= document.getElementById('f-email').value.trim();
+
+  if (!sol || !loc || !resp) { alert('Preencha Solicitante, Local e Responsável.'); return; }
+  if (budgetItems.length === 0) { alert('Adicione ao menos um item ao orçamento.'); return; }
+
+  const b = {
+    id:         editingBudget ? editingBudget.id : uid(),
+    version:    editingBudget ? (editingBudget.version||1) + 1 : 1,
+    solicitante: sol,
+    local:      loc,
+    responsavel:resp,
+    email,
+    items:      JSON.parse(JSON.stringify(budgetItems)),
+    total:      calcTotal(budgetItems),
+    data:       new Date().toISOString(),
+  };
+
+  if (editingBudget) {
+    budgets = budgets.map(x => x.id === editingBudget.id ? b : x);
+  } else {
+    budgets.push(b);
+  }
+  saveBudgets(budgets);
+  updateBadges();
+  clearForm();
+  alert('Orçamento salvo com sucesso!');
+  // switch to history
+  document.querySelectorAll('.tab-btn')[1].click();
+}
+
+function clearForm() {
+  ['f-solicitante','f-local','f-responsavel','f-email'].forEach(id => document.getElementById(id).value='');
+  budgetItems = [];
+  editingBudget = null;
+  document.getElementById('edit-banner').style.display = 'none';
+  renderItems();
+  updateStats();
+  supFilter = 'TODAS';
+  document.querySelectorAll('.sup-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sup-todas').classList.add('active');
+  renderCatalog();
+}
+
+function cancelEdit() { clearForm(); }
+
+// ═══════════════════════════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════════════════════════
+function renderHistory() {
+  const s   = (document.getElementById('hf-solicitante').value||'').toLowerCase();
+  const l   = (document.getElementById('hf-local').value||'').toLowerCase();
+  const r   = (document.getElementById('hf-responsavel').value||'').toLowerCase();
+  const di  = document.getElementById('hf-inicio').value;
+  const df  = document.getElementById('hf-fim').value;
+
+  const list = [...budgets].sort((a,b) => new Date(b.data)-new Date(a.data)).filter(b => {
+    if (s && !b.solicitante.toLowerCase().includes(s)) return false;
+    if (l && !b.local.toLowerCase().includes(l)) return false;
+    if (r && !b.responsavel.toLowerCase().includes(r)) return false;
+    const d = new Date(b.data);
+    if (di && d < new Date(di)) return false;
+    if (df && d > new Date(df+'T23:59')) return false;
+    return true;
+  });
+
+  const container = document.getElementById('history-list');
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Nenhum orçamento encontrado.</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(b => `
+    <div class="hist-card">
+      <div class="flex-between">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span style="font-weight:700;font-size:16px">${b.local}</span>
+            <span class="version-pill">v${b.version||1}</span>
+          </div>
+          <div class="hist-meta">
+            <div class="hist-meta-item">👤 <span>${b.solicitante}</span></div>
+            <div class="hist-meta-item">🔧 <span>${b.responsavel}</span></div>
+            <div class="hist-meta-item">📅 <span>${fmtDate(b.data)}</span></div>
+            <div class="hist-meta-item">📦 <span>${b.items.length} itens</span></div>
+            ${b.email ? `<div class="hist-meta-item">✉️ <span>${b.email}</span></div>` : ''}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-total">${fmt(b.total)}</div>
+          <div class="hist-actions" style="margin-top:10px">
+            <button class="btn btn-ghost btn-sm" onclick="editBudget(${b.id})">✏️ Editar</button>
+            <button class="btn btn-green btn-sm" onclick="printBudget(${b.id})">🖨️ PDF</button>
+            <button class="btn btn-blue btn-sm" onclick="emailBudget(${b.id})">📧 E-mail</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBudget(${b.id})">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function clearHistFilters() {
+  ['hf-solicitante','hf-local','hf-responsavel','hf-inicio','hf-fim'].forEach(id => document.getElementById(id).value='');
+  renderHistory();
+}
+
+function editBudget(id) {
+  const b = budgets.find(x => x.id === id);
+  if (!b) return;
+  editingBudget = b;
+  document.getElementById('f-solicitante').value = b.solicitante;
+  document.getElementById('f-local').value       = b.local;
+  document.getElementById('f-responsavel').value = b.responsavel;
+  document.getElementById('f-email').value        = b.email||'';
+  budgetItems = JSON.parse(JSON.stringify(b.items));
+  const banner = document.getElementById('edit-banner');
+  banner.style.display = 'flex';
+  document.getElementById('edit-banner-text').innerHTML =
+    `⚠️ Editando orçamento de <strong>${b.solicitante}</strong> — <strong>${b.local}</strong> (versão atual: ${b.version||1}). Ao salvar, será criada a versão ${(b.version||1)+1}.`;
+  renderItems();
+  updateStats();
+  document.querySelectorAll('.tab-btn')[0].click();
+}
+
+function deleteBudget(id) {
+  if (!confirm('Excluir este orçamento?')) return;
+  budgets = budgets.filter(b => b.id !== id);
+  saveBudgets(budgets);
+  updateBadges();
+  renderHistory();
+}
+
+function emailBudget(id) {
+  const b = budgets.find(x => x.id === id);
+  if (!b) return;
+  const sub  = encodeURIComponent(`Orçamento ${b.local} — v${b.version||1}`);
+  const body = encodeURIComponent(
+    `Orçamento de Materiais — Redes & CFTV\n\n` +
+    `Local: ${b.local}\nSolicitante: ${b.solicitante}\nResponsável: ${b.responsavel}\n` +
+    `Data: ${new Date(b.data).toLocaleDateString('pt-BR')}\nVersão: ${b.version||1}\n\n` +
+    `Total: ${fmt(b.total)}\n\nSegue orçamento detalhado em anexo.`
+  );
+  window.location.href = `mailto:${b.email||''}?subject=${sub}&body=${body}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PRINT / PDF
+// ═══════════════════════════════════════════════════════════════
+function printBudget(id) {
+  const b = budgets.find(x => x.id === id);
+  if (!b) return;
+
+  const rows = b.items.map(it => {
+    const m = getMat(it.materialId);
+    if (!m) return '';
+    return `<tr>
+      <td style="font-family:monospace;font-size:11px;color:#e67e22">${m.codigo}</td>
+      <td>${m.descricao}</td>
+      <td style="text-align:center">${m.unidade}</td>
+      <td style="text-align:center;font-family:monospace">${it.qty}</td>
+      <td style="text-align:right;font-family:monospace">${fmt(m.custo)}</td>
+      <td style="text-align:right;font-family:monospace;font-weight:700">${fmt(m.custo*it.qty)}</td>
+      <td style="text-align:center">
+        <span style="background:${m.aquisicao==='COMPRA'?'#dbeafe':'#dcfce7'};color:${m.aquisicao==='COMPRA'?'#1d4ed8':'#166534'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600">${m.aquisicao}</span>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const compra  = b.items.reduce((s,it)=>{ const m=getMat(it.materialId); return s+(m&&m.aquisicao==='COMPRA'?m.custo*it.qty:0);},0);
+  const estoque = b.items.reduce((s,it)=>{ const m=getMat(it.materialId); return s+(m&&m.aquisicao==='ESTOQUE'?m.custo*it.qty:0);},0);
+
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Orçamento — ${b.local}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;color:#111;background:white;padding:32px;font-size:13px}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+  .logo-box{width:40px;height:40px;background:#f97316;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:white}
+  .logo-text{font-size:20px;font-weight:700;color:#1a1a1a}
+  .logo-sub{font-size:12px;color:#666}
+  h1{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+  .version{font-size:12px;color:#888;margin-bottom:16px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .meta-item{background:#f8f8f8;border-radius:6px;padding:9px 12px}
+  .meta-item label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;display:block;margin-bottom:2px}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+  thead th{background:#1a1a1a;color:white;padding:9px 10px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  thead th.r{text-align:right} thead th.c{text-align:center}
+  tbody td{padding:8px 10px;border-bottom:1px solid #eee}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:nth-child(even) td{background:#fafafa}
+  .total-section{margin-top:16px;display:flex;justify-content:flex-end}
+  .total-box{background:#fff4ec;border:2px solid #f97316;border-radius:8px;padding:12px 20px;min-width:280px}
+  .total-line{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;color:#666}
+  .total-grand{display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:#f97316;border-top:1px solid #f97316;padding-top:8px;margin-top:4px}
+  .footer{margin-top:32px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:12px}
+  @media print{body{padding:16px}}
+</style></head><body>
+<div class="logo">
+  <div class="logo-box">📡</div>
+  <div><div class="logo-text">OrcaNet</div><div class="logo-sub">Sistema de Orçamentos — Redes &amp; CFTV</div></div>
+</div>
+<h1>Orçamento de Materiais</h1>
+<div class="version">Versão ${b.version||1} &nbsp;·&nbsp; Emitido em ${fmtDate(b.data)}</div>
+<div class="meta">
+  <div class="meta-item"><label>Local / Projeto</label>${b.local}</div>
+  <div class="meta-item"><label>Solicitante</label>${b.solicitante}</div>
+  <div class="meta-item"><label>Responsável pelo Orçamento</label>${b.responsavel}</div>
+  <div class="meta-item"><label>E-mail de Envio</label>${b.email||'—'}</div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Código SAP</th><th>Descrição</th>
+      <th class="c">Un.</th><th class="c">Qtd</th>
+      <th class="r">Custo Unit.</th><th class="r">Total</th>
+      <th class="c">Aquisição</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="total-section">
+  <div class="total-box">
+    <div class="total-line"><span>Subtotal Compra:</span><span>${fmt(compra)}</span></div>
+    <div class="total-line"><span>Subtotal Estoque:</span><span>${fmt(estoque)}</span></div>
+    <div class="total-grand"><span>TOTAL GERAL</span><span>${fmt(b.total)}</span></div>
+  </div>
+</div>
+<div class="footer">Documento gerado pelo OrcaNet — Sistema de Orçamentos · Redes &amp; CFTV</div>
+</body></html>`;
+
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CADASTRO
+// ═══════════════════════════════════════════════════════════════
+function renderCadTable() {
+  const q = (document.getElementById('cad-search').value||'').toLowerCase();
+  const filtered = materials.filter(m => !q || m.descricao.toLowerCase().includes(q) || m.codigo.toLowerCase().includes(q));
+  document.getElementById('cad-count-label').textContent = materials.length;
+
+  const tbody = document.getElementById('cad-tbody');
+  tbody.innerHTML = filtered.length === 0
+    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhum insumo encontrado</td></tr>`
+    : filtered.map(m => `
+      <tr>
+        <td><span class="code-badge">${m.codigo}</span></td>
+        <td>${m.descricao}</td>
+        <td class="c" style="color:var(--text2)">${m.unidade}</td>
+        <td class="r mono">${fmt(m.custo)}</td>
+        <td class="c"><span class="acq-badge ${m.aquisicao==='COMPRA'?'acq-compra':'acq-estoque'}">${m.aquisicao}</span></td>
+        <td style="color:var(--text3);font-size:12px">${m.obs||'—'}</td>
+        <td class="c">
+          <button class="btn btn-ghost btn-xs" onclick="startEditMat(${m.id})" style="margin-right:4px">✏️</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteMat(${m.id})">🗑️</button>
+        </td>
+      </tr>`).join('');
+}
+
+function saveMaterial() {
+  const cod  = document.getElementById('cad-codigo').value.trim();
+  const desc = document.getElementById('cad-descricao').value.trim();
+  const un   = document.getElementById('cad-unidade').value.trim();
+  const custo= parseFloat(document.getElementById('cad-custo').value)||0;
+  const acq  = document.getElementById('cad-aquisicao').value;
+  const obs  = document.getElementById('cad-obs').value.trim();
+
+  if (!desc) { alert('Descrição é obrigatória.'); return; }
+
+  if (editingMatId) {
+    materials = materials.map(m => m.id === editingMatId ? {...m, codigo:cod||'—', descricao:desc, unidade:un||'PC', custo, aquisicao:acq, obs} : m);
+    cancelMatEdit();
+  } else {
+    materials.push({ id: uid(), codigo: cod||'—', descricao: desc, unidade: un||'PC', custo, aquisicao: acq, obs });
+  }
+  saveMaterials(materials);
+  updateBadges();
+  renderCadTable();
+  renderCatalog();
+  clearCadForm();
+}
+
+function startEditMat(id) {
+  const m = getMat(id);
+  if (!m) return;
+  editingMatId = id;
+  document.getElementById('cad-codigo').value     = m.codigo;
+  document.getElementById('cad-descricao').value  = m.descricao;
+  document.getElementById('cad-unidade').value    = m.unidade;
+  document.getElementById('cad-custo').value      = m.custo;
+  document.getElementById('cad-aquisicao').value  = m.aquisicao;
+  document.getElementById('cad-obs').value        = m.obs||'';
+  document.getElementById('cad-title').textContent = 'Editar Insumo';
+  document.getElementById('cad-cancel').style.display = 'inline-flex';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelMatEdit() {
+  editingMatId = null;
+  clearCadForm();
+  document.getElementById('cad-title').textContent = 'Novo Insumo';
+  document.getElementById('cad-cancel').style.display = 'none';
+}
+
+function deleteMat(id) {
+  if (!confirm('Excluir este insumo?')) return;
+  materials = materials.filter(m => m.id !== id);
+  saveMaterials(materials);
+  updateBadges();
+  renderCadTable();
+  renderCatalog();
+}
+
+function clearCadForm() {
+  ['cad-codigo','cad-descricao','cad-unidade','cad-custo','cad-obs'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('cad-aquisicao').value = 'COMPRA';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BADGES
+// ═══════════════════════════════════════════════════════════════
+function updateBadges() {
+  document.getElementById('hist-count').textContent = budgets.length;
+  document.getElementById('mat-count').textContent  = materials.length;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+updateBadges();
+renderCatalog();
+updateStats();
+</script>
+</body>
+</html>
